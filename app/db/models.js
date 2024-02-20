@@ -2,12 +2,20 @@ import { mongoose } from "mongoose";
 
 const { Schema } = mongoose;
 
-const bookSchema = new Schema(
+const entrySchema = new Schema(
   {
-    title: {
+    date: {
+      type: Date,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["work", "learning", "interestingThings"],
+      required: true,
+    },
+    text: {
       type: String,
       required: true,
-      minLength: [3, "That's too short"],
     },
   },
   // Automatically add `createdAt` and `updatedAt` timestamps:
@@ -20,8 +28,8 @@ const bookSchema = new Schema(
 // in the database (which will be created automatically).
 export const models = [
   {
-    name: "Book",
-    schema: bookSchema,
-    collection: "books",
+    name: "Entry",
+    schema: entrySchema,
+    collection: "entries",
   },
 ];
