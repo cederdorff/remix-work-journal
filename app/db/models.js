@@ -10,7 +10,7 @@ const entrySchema = new Schema(
     },
     type: {
       type: String,
-      enum: ["work", "learning", "interestingThings"],
+      enum: ["work", "learning", "interesting-thing"],
       required: true,
     },
     text: {
