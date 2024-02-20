@@ -50,7 +50,7 @@ export default function Index() {
         Learnings and doings. Updated weekly.
       </p>
 
-      <div className="my-8 border p-3 dark:border-gray-700">
+      <div className="my-8 border p-3 dark:border-gray-700 rounded-md">
         <p className="italic">Create a new entry</p>
 
         <fetcher.Form method="post" className="mt-2">
@@ -63,7 +63,7 @@ export default function Index() {
                 type="date"
                 name="date"
                 required
-                className="text-gray-900 dark:bg-gray-700 dark:text-gray-300"
+                className="text-gray-900 dark:bg-gray-700 dark:text-gray-300 py-2 px-3 rounded-md"
                 defaultValue={format(new Date(), "yyyy-MM-dd")}
               />
             </div>
@@ -90,13 +90,13 @@ export default function Index() {
               ref={textareaRef}
               placeholder="Type your entry..."
               name="text"
-              className="w-full text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+              className="w-full text-gray-700 dark:bg-gray-700 dark:text-gray-300 py-2 px-3 rounded-md"
               required
             />
             <div className="mt-4 text-right">
               <button
                 type="submit"
-                className="bg-blue-500 px-4 py-2 font-semibold text-white dark:bg-blue-600"
+                className="bg-blue-500 px-6 py-2 font-semibold text-white dark:bg-blue-600 rounded-md"
               >
                 {fetcher.state === "submitting" ? "Saving..." : "Save"}
               </button>
