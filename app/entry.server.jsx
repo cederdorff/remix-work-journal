@@ -11,9 +11,11 @@ import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import connectDb from "./db/connectDb.server";
+import seedDb from "./db/seedingDb.server";
 
 // Connect to MongoDB (reusing the connection if it already exists)
 connectDb();
+await seedDb();
 
 const ABORT_DELAY = 5_000;
 
