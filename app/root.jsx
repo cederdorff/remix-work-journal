@@ -1,31 +1,35 @@
 import {
   Links,
+  Link,
   LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import styles from "./tailwind.css";
 
-import stylesheet from "~/tailwind.css";
-
-export const links = () => [{ rel: "stylesheet", href: stylesheet }];
-
-export const meta = () => [
+export const links = () => [
   {
-    charset: "utf-8",
-    title: "Work Journal - RACE",
-    viewport: "width=device-width,initial-scale=1",
+    rel: "stylesheet",
+    href: styles,
   },
 ];
+
+export function meta() {
+  return [{ title: "Work Journal" }];
+}
+
 export default function App() {
   return (
     <html lang="en">
       <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body className="dark:bg-gray-900">
+      <body>
         <Outlet />
         <ScrollRestoration />
         <Scripts />
