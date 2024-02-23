@@ -7,10 +7,7 @@ import { getSession } from "~/session";
 export async function loader({ request }) {
   const session = await getSession(request.headers.get("cookie"));
 
-  const entries = await mongoose.models.Entry.find({})
-    .sort({ date: -1 })
-    .lean()
-    .exec();
+  const entries = await mongoose.models.Entry.find().sort({ date: -1 }).lean();
 
   return {
     session: session.data,
@@ -23,6 +20,7 @@ export async function loader({ request }) {
 
 export default function Index() {
   const { session, entries } = useLoaderData();
+  console.log(entries);
 
   const entriesByWeek = entries.reduce((memo, entry) => {
     const sunday = startOfWeek(parseISO(entry.date));
