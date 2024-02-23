@@ -1,174 +1,20 @@
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import mongoose from "mongoose";
-import { useEffect, useRef } from "react";
-
-export async function loader() {
-  const entries = await mongoose.models.Entry.find();
-  return entries;
-}
-
-export default function Index() {
-  const fetcher = useFetcher();
-  const textareaRef = useRef();
-  const entries = useLoaderData();
-
-  const entriesByWeek = entries.reduce((memo, entry) => {
-    const sunday = startOfWeek(parseISO(entry.date));
-    const sundayString = format(sunday, "yyyy-MM-dd");
-
-    memo[sundayString] ||= [];
-    memo[sundayString].push(entry);
-
-    return memo;
-  }, {});
-
-  const weeks = Object.keys(entriesByWeek)
-    .sort((a, b) => a.localeCompare(b))
-    .map((dateString) => ({
-      dateString,
-      work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
-      learnings: entriesByWeek[dateString].filter(
-        (entry) => entry.type === "learning",
-      ),
-      interestingThings: entriesByWeek[dateString].filter(
-        (entry) => entry.type === "interesting-thing",
-      ),
-    }));
-
-  useEffect(() => {
-    if (fetcher.state === "idle" && textareaRef.current) {
-      textareaRef.current.value = "";
-      textareaRef.current.focus();
-    }
-  }, [fetcher.state]);
-
-  return (
-    <div className="p-10 rpi ">
-      <h1 className="text-5xl">Work Journal</h1>
-      <p className="mt-2 text-lg text-gray-400">
-        Learnings and doings. Updated weekly.
-      </p>
-
-      <div className="my-8 border px-3 py-4 rounded-md">
-        <p className="italic">Create a new entry</p>
-
-        <fetcher.Form method="post" className="mt-2">
-          <fieldset
-            className="disabled:opacity-70"
-            disabled={fetcher.state === "submitting"}
-          >
-            <div>
-              <div>
-                <input
-                  type="date"
-                  name="date"
-                  required
-                  className="text-gray-900 px-3 py-2 rounded-md"
-                  defaultValue={format(new Date(), "yyyy-MM-dd")}
-                />
-              </div>
-              <div className="mt-4 space-x-4">
-                <label className="inline-block">
-                  <input
-                    required
-                    type="radio"
-                    defaultChecked
-                    className="mr-1"
-                    name="type"
-                    value="work"
-                  />
-                  Work
-                </label>
-                <label className="inline-block">
-                  <input
-                    type="radio"
-                    className="mr-1"
-                    name="type"
-                    value="learning"
-                  />
-                  Learning
-                </label>
-                <label className="inline-block">
-                  <input
-                    type="radio"
-                    className="mr-1"
-                    name="type"
-                    value="interesting-thing"
-                  />
-                  Interesting thing
-                </label>
-              </div>
-            </div>
-            <div className="mt-4">
-              <textarea
-                ref={textareaRef}
-                placeholder="Type your entry..."
-                name="text"
-                className="w-full text-gray-700 px-3 py-2 rounded-md"
-                required
-              />
-            </div>
-            <div className="mt-2 text-right">
-              <button
-                type="submit"
-                className="bg-blue-500 px-4 py-2 font-semibold text-white rounded-md disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {fetcher.state === "submitting" ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </fieldset>
-        </fetcher.Form>
-      </div>
-
-      <div className="mt-12 space-y-12">
-        {weeks.map((week) => (
-          <div key={week.dateString}>
-            <p className="font-bold">
-              Week of {format(parseISO(week.dateString), "MMMM do")}
-            </p>
-            <div className="mt-3 space-y-4">
-              {week.work.length > 0 && (
-                <div>
-                  <p>Work</p>
-                  <ul className="ml-8 list-disc">
-                    {week.work.map((entry) => (
-                      <li key={entry._id}>{entry.text}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {week.learnings.length > 0 && (
-                <div>
-                  <p>Learning</p>
-                  <ul className="ml-8 list-disc">
-                    {week.learnings.map((entry) => (
-                      <li key={entry._id}>{entry.text}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {week.interestingThings.length > 0 && (
-                <div>
-                  <p>Interesting things</p>
-                  <ul className="ml-8 list-disc">
-                    {week.interestingThings.map((entry) => (
-                      <li key={entry._id}>{entry.text}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+import EntryForm from "~/components/entry-form";
+import { getSession } from "~/session";
 
 export async function action({ request }) {
-  const formData = await request.formData();
-  const { date, type, text } = Object.fromEntries(formData);
+  let session = await getSession(request.headers.get("cookie"));
+  if (!session.data.isAdmin) {
+    throw new Response("Not authenticated", {
+      status: 401,
+      statusText: "Not authenticated",
+    });
+  }
+
+  let formData = await request.formData();
+  let { date, type, text } = Object.fromEntries(formData);
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -180,9 +26,125 @@ export async function action({ request }) {
     throw new Error("Bad request");
   }
 
-  return await mongoose.models.Entry.create({
+  const entry = new mongoose.models.Entry({
     date: new Date(date),
     type,
     text,
   });
+
+  await entry.save();
+
+  return null;
+}
+
+export async function loader({ request }) {
+  let session = await getSession(request.headers.get("cookie"));
+
+  let entries = await mongoose.models.Entry.find({})
+    .sort({ date: -1 })
+    .lean()
+    .exec();
+
+  return {
+    session: session.data,
+    entries: entries.map((entry) => ({
+      ...entry,
+      date: entry.date.toISOString().substring(0, 10),
+    })),
+  };
+}
+
+export default function Index() {
+  let { session, entries } = useLoaderData();
+
+  let entriesByWeek = entries.reduce((memo, entry) => {
+    let sunday = startOfWeek(parseISO(entry.date));
+    let sundayString = format(sunday, "yyyy-MM-dd");
+
+    memo[sundayString] ||= [];
+    memo[sundayString].push(entry);
+
+    return memo;
+  }, {});
+
+  let weeks = Object.keys(entriesByWeek).map((dateString) => ({
+    dateString,
+    work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
+    learnings: entriesByWeek[dateString].filter(
+      (entry) => entry.type === "learning",
+    ),
+    interestingThings: entriesByWeek[dateString].filter(
+      (entry) => entry.type === "interesting-thing",
+    ),
+  }));
+
+  return (
+    <div>
+      {session.isAdmin && (
+        <div className="mb-8 rounded-lg border border-gray-700/30 bg-gray-800/50 p-4 lg:mb-20 lg:p-6">
+          <p className="text-sm font-medium text-gray-500 lg:text-base">
+            New entry
+          </p>
+
+          <EntryForm />
+        </div>
+      )}
+
+      <div className="mt-12 space-y-12 border-l-2 border-sky-500/[.15] pl-5 lg:space-y-20 lg:pl-8">
+        {weeks.map((week) => (
+          <div key={week.dateString} className="relative">
+            <div className="absolute left-[-34px] rounded-full bg-gray-900 p-2 lg:left-[-46px]">
+              <div className="h-[10px] w-[10px] rounded-full border border-sky-500 bg-gray-900" />
+            </div>
+
+            <p className="pt-[5px] text-xs font-semibold uppercase tracking-wider text-sky-500 lg:pt-[3px] lg:text-sm">
+              Week of {format(parseISO(week.dateString), "MMMM d, yyyy")}
+            </p>
+
+            <div className="mt-6 space-y-8 lg:space-y-12">
+              <EntryList entries={week.work} label="Work" />
+              <EntryList entries={week.learnings} label="Learnings" />
+              <EntryList
+                entries={week.interestingThings}
+                label="Interesting things"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EntryList({ entries, label }) {
+  return entries.length > 0 ? (
+    <div>
+      <p className="font-semibold text-white">{label}</p>
+
+      <ul className="mt-4 space-y-6">
+        {entries.map((entry) => (
+          <EntryListItem key={entry._id} entry={entry} />
+        ))}
+      </ul>
+    </div>
+  ) : null;
+}
+
+function EntryListItem({ entry }) {
+  let { session } = useLoaderData();
+
+  return (
+    <li className="group leading-7">
+      {entry.text}
+
+      {session.isAdmin && (
+        <Link
+          to={`/entries/${entry._id}/edit`}
+          className="ml-2 text-sky-500 opacity-0 group-hover:opacity-100"
+        >
+          Edit
+        </Link>
+      )}
+    </li>
+  );
 }

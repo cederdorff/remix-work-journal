@@ -1,9 +1,18 @@
+const colors = require("tailwindcss/colors");
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 /** @type {import('tailwindcss').Config} */
-export default {
-  content: ["./app/**/*.{ts,tsx,jsx,js}"],
+module.exports = {
+  content: ["./app/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        gray: colors.zinc,
+      },
+      fontFamily: {
+        sans: ["Inter var", ...defaultTheme.fontFamily.sans],
+      },
+    },
   },
-  plugins: [],
-  darkMode: "media",
+  plugins: [require("@tailwindcss/forms")],
 };
