@@ -4,43 +4,10 @@ import mongoose from "mongoose";
 import EntryForm from "~/components/entry-form";
 import { getSession } from "~/session";
 
-export async function action({ request }) {
-  let session = await getSession(request.headers.get("cookie"));
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", {
-      status: 401,
-      statusText: "Not authenticated",
-    });
-  }
-
-  let formData = await request.formData();
-  let { date, type, text } = Object.fromEntries(formData);
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  if (
-    typeof date !== "string" ||
-    typeof type !== "string" ||
-    typeof text !== "string"
-  ) {
-    throw new Error("Bad request");
-  }
-
-  const entry = new mongoose.models.Entry({
-    date: new Date(date),
-    type,
-    text,
-  });
-
-  await entry.save();
-
-  return null;
-}
-
 export async function loader({ request }) {
-  let session = await getSession(request.headers.get("cookie"));
+  const session = await getSession(request.headers.get("cookie"));
 
-  let entries = await mongoose.models.Entry.find({})
+  const entries = await mongoose.models.Entry.find({})
     .sort({ date: -1 })
     .lean()
     .exec();
@@ -55,11 +22,11 @@ export async function loader({ request }) {
 }
 
 export default function Index() {
-  let { session, entries } = useLoaderData();
+  const { session, entries } = useLoaderData();
 
-  let entriesByWeek = entries.reduce((memo, entry) => {
-    let sunday = startOfWeek(parseISO(entry.date));
-    let sundayString = format(sunday, "yyyy-MM-dd");
+  const entriesByWeek = entries.reduce((memo, entry) => {
+    const sunday = startOfWeek(parseISO(entry.date));
+    const sundayString = format(sunday, "yyyy-MM-dd");
 
     memo[sundayString] ||= [];
     memo[sundayString].push(entry);
@@ -67,7 +34,7 @@ export default function Index() {
     return memo;
   }, {});
 
-  let weeks = Object.keys(entriesByWeek).map((dateString) => ({
+  const weeks = Object.keys(entriesByWeek).map((dateString) => ({
     dateString,
     work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
     learnings: entriesByWeek[dateString].filter(
@@ -116,6 +83,39 @@ export default function Index() {
   );
 }
 
+export async function action({ request }) {
+  const session = await getSession(request.headers.get("cookie"));
+  if (!session.data.isAdmin) {
+    throw new Response("Not authenticated", {
+      status: 401,
+      statusText: "Not authenticated",
+    });
+  }
+
+  const formData = await request.formData();
+  const { date, type, text } = Object.fromEntries(formData);
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  if (
+    typeof date !== "string" ||
+    typeof type !== "string" ||
+    typeof text !== "string"
+  ) {
+    throw new Error("Bad request");
+  }
+
+  const entry = new mongoose.models.Entry({
+    date: new Date(date),
+    type,
+    text,
+  });
+
+  await entry.save();
+
+  return null;
+}
+
 function EntryList({ entries, label }) {
   return entries.length > 0 ? (
     <div>
@@ -131,7 +131,7 @@ function EntryList({ entries, label }) {
 }
 
 function EntryListItem({ entry }) {
-  let { session } = useLoaderData();
+  const { session } = useLoaderData();
 
   return (
     <li className="group leading-7">

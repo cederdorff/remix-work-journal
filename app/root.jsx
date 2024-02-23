@@ -30,7 +30,7 @@ export const meta = () => [
 ];
 
 export async function action({ request }) {
-  let session = await getSession(request.headers.get("cookie"));
+  const session = await getSession(request.headers.get("cookie"));
 
   return redirect("/", {
     headers: {
@@ -40,13 +40,13 @@ export async function action({ request }) {
 }
 
 export async function loader({ request }) {
-  let session = await getSession(request.headers.get("cookie"));
+  const session = await getSession(request.headers.get("cookie"));
 
   return { session: session.data };
 }
 
 export default function App() {
-  let { session } = useLoaderData();
+  const { session } = useLoaderData();
 
   return (
     <html lang="en">
@@ -99,7 +99,7 @@ export default function App() {
 }
 
 export function ErrorBoundary() {
-  let error = useRouteError();
+  const error = useRouteError();
   console.error(error);
 
   return (

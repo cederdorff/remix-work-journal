@@ -3,14 +3,14 @@ import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { commitSession, getSession } from "~/session";
 
 export async function loader({ request }) {
-  let session = await getSession(request.headers.get("cookie"));
+  const session = await getSession(request.headers.get("cookie"));
 
   return session.data;
 }
 
 export default function LoginPage() {
-  let data = useLoaderData();
-  let actionData = useActionData();
+  const data = useLoaderData();
+  const actionData = useActionData();
 
   return (
     <div className="mx-auto mt-8 max-w-xs lg:max-w-sm">
@@ -51,11 +51,11 @@ export default function LoginPage() {
 }
 
 export async function action({ request }) {
-  let formData = await request.formData();
-  let { email, password } = Object.fromEntries(formData);
+  const formData = await request.formData();
+  const { email, password } = Object.fromEntries(formData);
 
   if (email === process.env.EMAIL && password === process.env.PASSWORD) {
-    let session = await getSession();
+    const session = await getSession();
     session.set("isAdmin", true);
 
     return redirect("/", {
