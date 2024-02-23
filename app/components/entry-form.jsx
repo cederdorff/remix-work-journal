@@ -3,8 +3,8 @@ import { format } from "date-fns";
 import { useEffect, useRef } from "react";
 
 export default function EntryForm({ entry }) {
-  let fetcher = useFetcher();
-  let textareaRef = useRef(null);
+  const fetcher = useFetcher();
+  const textareaRef = useRef(null);
   const isIdle = fetcher.state === "idle";
   const isInit = isIdle && fetcher.data == null;
 
