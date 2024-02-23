@@ -28,7 +28,7 @@ export default function EntryForm({ entry }) {
               name="date"
               required
               style={{ colorScheme: "dark" }}
-              className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
+              className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600 hover:cursor-pointer"
               defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
             />
           </div>
@@ -39,11 +39,14 @@ export default function EntryForm({ entry }) {
               { label: "Learning", value: "learning" },
               { label: "Interesting thing", value: "interesting-thing" },
             ].map((option) => (
-              <label key={option.value} className="inline-block text-white">
+              <label
+                key={option.value}
+                className="inline-block text-white hover:cursor-pointer"
+              >
                 <input
                   required
                   type="radio"
-                  className="mr-2 border-gray-700 bg-gray-800 text-sky-600  focus:ring-sky-600 focus:ring-offset-gray-900"
+                  className="mr-2 border-gray-700 bg-gray-800 text-sky-600  focus:ring-sky-600 focus:ring-offset-gray-900 hover:cursor-pointer"
                   name="type"
                   value={option.value}
                   defaultChecked={option.value === (entry?.type ?? "work")}
@@ -69,7 +72,7 @@ export default function EntryForm({ entry }) {
         <div className="mt-6 text-right">
           <button
             type="submit"
-            className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900 lg:w-auto lg:py-1.5"
+            className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900 lg:w-auto lg:py-2.5 lg:px-6"
           >
             {fetcher.state !== "idle" ? "Saving..." : "Save"}
           </button>
