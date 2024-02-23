@@ -2,34 +2,6 @@ import { redirect, json } from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
 import { commitSession, getSession } from "~/session";
 
-export async function action({ request }) {
-  let formData = await request.formData();
-  let { email, password } = Object.fromEntries(formData);
-
-  if (email === process.env.EMAIL && password === process.env.PASSWORD) {
-    let session = await getSession();
-    session.set("isAdmin", true);
-
-    return redirect("/", {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
-    });
-  } else {
-    let error;
-
-    if (!email) {
-      error = "Email is required.";
-    } else if (!password) {
-      error = "Password is required.";
-    } else {
-      error = "Invalid login.";
-    }
-
-    return json({ error }, 401);
-  }
-}
-
 export async function loader({ request }) {
   let session = await getSession(request.headers.get("cookie"));
 
@@ -76,4 +48,32 @@ export default function LoginPage() {
       )}
     </div>
   );
+}
+
+export async function action({ request }) {
+  let formData = await request.formData();
+  let { email, password } = Object.fromEntries(formData);
+
+  if (email === process.env.EMAIL && password === process.env.PASSWORD) {
+    let session = await getSession();
+    session.set("isAdmin", true);
+
+    return redirect("/", {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    });
+  } else {
+    let error;
+
+    if (!email) {
+      error = "Email is required.";
+    } else if (!password) {
+      error = "Password is required.";
+    } else {
+      error = "Invalid login.";
+    }
+
+    return json({ error }, 401);
+  }
 }
