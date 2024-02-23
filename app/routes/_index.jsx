@@ -20,7 +20,6 @@ export async function loader({ request }) {
 
 export default function Index() {
   const { session, entries } = useLoaderData();
-  console.log(entries);
 
   const entriesByWeek = entries.reduce((memo, entry) => {
     const sunday = startOfWeek(parseISO(entry.date));

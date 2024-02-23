@@ -9,9 +9,7 @@ export async function loader({ params, request }) {
     throw new Response("Not found", { status: 404, statusText: "Not found" });
   }
 
-  const entry = await mongoose.models.Entry.findById(params.entryId)
-    .lean()
-    .exec();
+  const entry = await mongoose.models.Entry.findById(params.entryId).lean();
 
   if (!entry) {
     throw new Response("Not found", { status: 404, statusText: "Not found" });
