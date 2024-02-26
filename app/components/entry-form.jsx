@@ -1,12 +1,18 @@
 import { useFetcher } from "@remix-run/react";
 import { format } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function EntryForm({ entry }) {
   const fetcher = useFetcher();
   const textareaRef = useRef(null);
   const isIdle = fetcher.state === "idle";
   const isInit = isIdle && fetcher.data == null;
+
+  const [image, setImage] = useState(
+    entry?.image
+      ? `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`
+      : null,
+  );
 
   useEffect(() => {
     if (!isInit && isIdle && textareaRef.current) {
@@ -65,14 +71,17 @@ export default function EntryForm({ entry }) {
             name="image"
             type="file"
             required
+            onChange={(e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                setImage(e.target.result);
+              };
+              reader.readAsDataURL(file);
+            }}
           />
-          {entry?.image && (
-            <img
-              src={`data:${entry?.image.contentType};base64,${entry.image.data.toString("base64")}`}
-              alt=""
-              className="mt-2 rounded-lg"
-            />
-          )}
+          {image && <img src={image} alt="" className="mt-2 rounded-lg" />}
         </div>
 
         <div className="mt-6">
@@ -90,7 +99,7 @@ export default function EntryForm({ entry }) {
         <div className="mt-6 text-right">
           <button
             type="submit"
-            className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900 lg:w-auto lg:py-2.5 lg:px-6"
+            className="w-full rounded-md cursor-pointer bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900 lg:w-auto lg:py-2.5 lg:px-6"
           >
             {fetcher.state !== "idle" ? "Saving..." : "Save"}
           </button>
