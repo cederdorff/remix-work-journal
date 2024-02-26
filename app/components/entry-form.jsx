@@ -25,6 +25,16 @@ export default function EntryForm({ entry }) {
     }
   }, [entry?.image]);
 
+  function handleImageChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImage(e.target.result);
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
     <fetcher.Form method="post" className="mt-4" encType="multipart/form-data">
       <fieldset
@@ -75,15 +85,7 @@ export default function EntryForm({ entry }) {
             name="image"
             type="file"
             required
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (!file) return;
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                setImage(e.target.result);
-              };
-              reader.readAsDataURL(file);
-            }}
+            onChange={handleImageChange}
           />
           {image && <img src={image} alt="" className="mt-2 rounded-lg" />}
         </div>
