@@ -14,6 +14,10 @@ export async function loader({ request }) {
     entries: entries.map((entry) => ({
       ...entry,
       date: entry.date.toISOString().substring(0, 10),
+      // Convert the image buffer to a Base64 string if the image exists
+      image: entry.image?.data
+        ? `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`
+        : null,
     })),
   };
 }
@@ -90,25 +94,46 @@ export async function action({ request }) {
   }
 
   const formData = await request.formData();
-  const { date, type, text } = Object.fromEntries(formData);
+  // Correctly extract fields and files
+  const date = formData.get("date");
+  const type = formData.get("type"); // Get the type field
+  const text = formData.get("text"); // Get the text field
+  const imageFile = formData.get("image"); // Get the image file
 
+  // Simulate a delay (if needed)
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
+  // Check for the presence and types of the text fields
   if (
     typeof date !== "string" ||
     typeof type !== "string" ||
-    typeof text !== "string"
+    typeof text !== "string" ||
+    !imageFile // Directly check for file presence, no need to check type
   ) {
     throw new Error("Bad request");
   }
 
-  const entry = new mongoose.models.Entry({
-    date: new Date(date),
-    type,
-    text,
-  });
+  // Assuming imageFile is a File object now, we can properly work with it
+  if (imageFile instanceof File) {
+    // Ensure imageFile is handled as a File
+    const imageData = await imageFile.arrayBuffer(); // Convert the image file to ArrayBuffer
+    const buffer = Buffer.from(imageData); // Convert ArrayBuffer to Node.js Buffer
+    const contentType = imageFile.type; // Get the MIME type of the image
 
-  await entry.save();
+    const entry = new mongoose.models.Entry({
+      date: new Date(date),
+      type,
+      text,
+      image: {
+        data: buffer,
+        contentType,
+      },
+    });
+
+    await entry.save();
+  } else {
+    throw new Error("Image file is missing or invalid");
+  }
 
   return null;
 }
@@ -133,6 +158,9 @@ function EntryListItem({ entry }) {
   return (
     <li className="group leading-7">
       {entry.text}
+      {entry.image && (
+        <img src={entry.image} alt={entry.text} className="max-w-xs mt-2" />
+      )}
 
       {session.isAdmin && (
         <Link

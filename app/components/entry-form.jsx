@@ -16,7 +16,7 @@ export default function EntryForm({ entry }) {
   }, [isInit, isIdle]);
 
   return (
-    <fetcher.Form method="post" className="mt-4">
+    <fetcher.Form method="post" className="mt-4" encType="multipart/form-data">
       <fieldset
         className="disabled:opacity-70"
         disabled={fetcher.state !== "idle"}
@@ -55,6 +55,17 @@ export default function EntryForm({ entry }) {
               </label>
             ))}
           </div>
+        </div>
+        <div className="mt-6">
+          <label className="block mb-2 text-white" htmlFor="file_input">
+            Image
+          </label>
+          <input
+            className="block w-full text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            name="image"
+            type="file"
+            required
+          />
         </div>
 
         <div className="mt-6">

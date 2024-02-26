@@ -17,9 +17,11 @@ const entrySchema = new Schema(
       type: String,
       required: true,
     },
+    image: {
+      data: Buffer,
+      contentType: String, // To store the MIME type of the image
+    },
   },
-  // Automatically add `createdAt` and `updatedAt` timestamps:
-  // https://mongoosejs.com/docs/timestamps.html
   { timestamps: true },
 );
 
