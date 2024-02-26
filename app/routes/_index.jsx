@@ -159,7 +159,11 @@ function EntryListItem({ entry }) {
     <li className="group leading-7">
       {entry.text}
       {entry.image && (
-        <img src={entry.image} alt={entry.text} className="max-w-xs mt-2" />
+        <img
+          src={entry.image}
+          alt={entry.text}
+          className="max-w-xs mt-2 rounded-lg"
+        />
       )}
 
       {session.isAdmin && (

@@ -66,6 +66,13 @@ export default function EntryForm({ entry }) {
             type="file"
             required
           />
+          {entry?.image && (
+            <img
+              src={`data:${entry?.image.contentType};base64,${entry.image.data.toString("base64")}`}
+              alt=""
+              className="mt-2 rounded-lg"
+            />
+          )}
         </div>
 
         <div className="mt-6">
