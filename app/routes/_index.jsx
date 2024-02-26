@@ -1,7 +1,8 @@
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import mongoose from "mongoose";
 import EntryForm from "~/components/entry-form";
+import EntryList from "~/components/entry-list";
 import { getSession } from "~/session";
 
 export async function loader({ request }) {
@@ -136,44 +137,4 @@ export async function action({ request }) {
   }
 
   return null;
-}
-
-function EntryList({ entries, label }) {
-  return entries.length > 0 ? (
-    <div>
-      <p className="font-semibold text-white">{label}</p>
-
-      <ul className="mt-4 space-y-6">
-        {entries.map((entry) => (
-          <EntryListItem key={entry._id} entry={entry} />
-        ))}
-      </ul>
-    </div>
-  ) : null;
-}
-
-function EntryListItem({ entry }) {
-  const { session } = useLoaderData();
-
-  return (
-    <li className="group leading-7">
-      {entry.text}
-      {entry.image && (
-        <img
-          src={entry.image}
-          alt={entry.text}
-          className="max-w-xs mt-2 rounded-lg"
-        />
-      )}
-
-      {session.isAdmin && (
-        <Link
-          to={`/entries/${entry._id}/edit`}
-          className="ml-2 text-sky-500 opacity-0 group-hover:opacity-100"
-        >
-          Edit
-        </Link>
-      )}
-    </li>
-  );
 }

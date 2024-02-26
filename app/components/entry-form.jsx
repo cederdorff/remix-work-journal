@@ -8,11 +8,7 @@ export default function EntryForm({ entry }) {
   const isIdle = fetcher.state === "idle";
   const isInit = isIdle && fetcher.data == null;
 
-  const [image, setImage] = useState(
-    entry?.image
-      ? `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`
-      : null,
-  );
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     if (!isInit && isIdle && textareaRef.current) {
@@ -20,6 +16,14 @@ export default function EntryForm({ entry }) {
       textareaRef.current.focus();
     }
   }, [isInit, isIdle]);
+
+  useEffect(() => {
+    if (entry?.image) {
+      setImage(
+        `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`,
+      );
+    }
+  }, [entry?.image]);
 
   return (
     <fetcher.Form method="post" className="mt-4" encType="multipart/form-data">
@@ -67,7 +71,7 @@ export default function EntryForm({ entry }) {
             Image
           </label>
           <input
-            className="block w-full text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+            className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
             name="image"
             type="file"
             required
