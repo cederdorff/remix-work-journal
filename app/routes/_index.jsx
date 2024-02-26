@@ -15,10 +15,6 @@ export async function loader({ request }) {
     entries: entries.map((entry) => ({
       ...entry,
       date: entry.date.toISOString().substring(0, 10),
-      // Convert the image buffer to a Base64 string if the image exists
-      image: entry.image?.data
-        ? `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`
-        : null,
     })),
   };
 }
