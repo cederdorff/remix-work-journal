@@ -78,12 +78,7 @@ export async function action({ request, params }) {
   }
 
   const formData = await request.formData();
-
-  const _action = formData.get("_action");
-  const date = formData.get("date");
-  const type = formData.get("type"); // Get the type field
-  const text = formData.get("text"); // Get the text field
-  const imageFile = formData.get("image"); // Get the image file
+  const { _action, date, type, text, image } = Object.fromEntries(formData);
 
   if (_action === "delete") {
     await mongoose.models.Entry.findByIdAndDelete(params.entryId);
@@ -94,7 +89,7 @@ export async function action({ request, params }) {
       typeof date !== "string" ||
       typeof type !== "string" ||
       typeof text !== "string" ||
-      !imageFile // Directly check for file presence, no need to check type
+      !image // Directly check for file presence, no need to check type
     ) {
       throw new Error("Bad request");
     }
@@ -105,8 +100,8 @@ export async function action({ request, params }) {
     entry.text = text; // Update the text
 
     // Assuming imageFile is a File object now, we can properly work with it
-    if (imageFile instanceof File) {
-      const imageUrl = await uploadImage(imageFile); // Upload the image to Firebase Storage
+    if (image instanceof File) {
+      const imageUrl = await uploadImage(image); // Upload the image to Firebase Storage
       entry.image = imageUrl; // Save the image URL to the entry
     }
 
