@@ -3,7 +3,7 @@ import { format, parseISO, startOfWeek } from "date-fns";
 import mongoose from "mongoose";
 import EntryForm from "~/components/entry-form";
 import EntryList from "~/components/entry-list";
-import { uploadImage } from "~/firebase-cloud-storage";
+import { uploadImage } from "~/firebase-cloud-storage.server";
 import { getSession } from "~/session";
 
 export async function loader({ request }) {
