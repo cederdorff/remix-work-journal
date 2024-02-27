@@ -8,7 +8,7 @@ export default function EntryForm({ entry }) {
   const isIdle = fetcher.state === "idle";
   const isInit = isIdle && fetcher.data == null;
 
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(entry?.image ? entry?.image : null);
 
   useEffect(() => {
     if (!isInit && isIdle && textareaRef.current) {
@@ -17,22 +17,19 @@ export default function EntryForm({ entry }) {
     }
   }, [isInit, isIdle]);
 
-  useEffect(() => {
-    if (entry?.image) {
-      setImage(
-        `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`,
-      );
-    }
-  }, [entry?.image]);
-
   function handleImageChange(event) {
     const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImage(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    if (file.size < 500000) {
+      // image file size must be below 0,5MB
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Image size must be less than 0.5MB.");
+      event.target.value = "";
+    }
   }
 
   return (

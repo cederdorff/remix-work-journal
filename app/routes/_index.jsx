@@ -3,6 +3,7 @@ import { format, parseISO, startOfWeek } from "date-fns";
 import mongoose from "mongoose";
 import EntryForm from "~/components/entry-form";
 import EntryList from "~/components/entry-list";
+import { uploadImage } from "~/firebase-cloud-storage";
 import { getSession } from "~/session";
 
 export async function loader({ request }) {
@@ -113,22 +114,7 @@ export async function action({ request }) {
   // Assuming imageFile is a File object now, we can properly work with it
   if (imageFile instanceof File) {
     // Ensure imageFile is handled as a File
-    const imageData = await imageFile.arrayBuffer(); // Convert the image file to ArrayBuffer
-    const buffer = Buffer.from(imageData); // Convert ArrayBuffer to Node.js Buffer
-    const url = `https://firebasestorage.googleapis.com/v0/b/${process.env.FIREBASE_PROJECT_ID}.appspot.com/o/${imageFile.name}`;
-
-    // POST request to upload image
-    const response = await fetch(url, {
-      method: "POST",
-      body: buffer,
-      headers: { "Content-Type": imageFile.type },
-    });
-    const data = await response.json();
-    console.log("===============================");
-    console.log(data); // data response from image upload
-    console.log("===============================");
-
-    const imageUrl = `${url}?alt=media`;
+    const imageUrl = await uploadImage(imageFile);
 
     const entry = new mongoose.models.Entry({
       date: new Date(date),
