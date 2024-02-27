@@ -17,10 +17,7 @@ const entrySchema = new Schema(
       type: String,
       required: true,
     },
-    image: {
-      data: Buffer,
-      contentType: String, // To store the MIME type of the image
-    },
+    image: String,
   },
   { timestamps: true },
 );

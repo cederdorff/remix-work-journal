@@ -115,16 +115,26 @@ export async function action({ request }) {
     // Ensure imageFile is handled as a File
     const imageData = await imageFile.arrayBuffer(); // Convert the image file to ArrayBuffer
     const buffer = Buffer.from(imageData); // Convert ArrayBuffer to Node.js Buffer
-    const contentType = imageFile.type; // Get the MIME type of the image
+    const url = `https://firebasestorage.googleapis.com/v0/b/${process.env.FIREBASE_PROJECT_ID}.appspot.com/o/${imageFile.name}`;
+
+    // POST request to upload image
+    const response = await fetch(url, {
+      method: "POST",
+      body: buffer,
+      headers: { "Content-Type": imageFile.type },
+    });
+    const data = await response.json();
+    console.log("===============================");
+    console.log(data); // data response from image upload
+    console.log("===============================");
+
+    const imageUrl = `${url}?alt=media`;
 
     const entry = new mongoose.models.Entry({
       date: new Date(date),
       type,
       text,
-      image: {
-        data: buffer,
-        contentType,
-      },
+      image: imageUrl,
     });
 
     await entry.save();
