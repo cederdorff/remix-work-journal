@@ -78,11 +78,7 @@ export async function action({ request, params }) {
 
   const formData = await request.formData();
 
-  const _action = formData.get("_action");
-  const date = formData.get("date");
-  const type = formData.get("type"); // Get the type field
-  const text = formData.get("text"); // Get the text field
-  const imageFile = formData.get("image"); // Get the image file
+  const { _action, date, type, text, image } = Object.fromEntries(formData); // Destructure imageFile from formData
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -95,7 +91,7 @@ export async function action({ request, params }) {
       typeof date !== "string" ||
       typeof type !== "string" ||
       typeof text !== "string" ||
-      !imageFile // Directly check for file presence, no need to check type
+      !image // Directly check for file presence, no need to check type
     ) {
       throw new Error("Bad request");
     }
@@ -106,11 +102,11 @@ export async function action({ request, params }) {
     entry.type = type;
     entry.text = text;
 
-    if (imageFile instanceof File) {
+    if (image instanceof File) {
       // Ensure imageFile is handled as a File
-      const imageData = await imageFile.arrayBuffer(); // Convert the image file to ArrayBuffer
+      const imageData = await image.arrayBuffer(); // Convert the image file to ArrayBuffer
       const buffer = Buffer.from(imageData); // Convert ArrayBuffer to Node.js Buffer
-      const contentType = imageFile.type; // Get the MIME type of the image
+      const contentType = image.type; // Get the MIME type of the image
 
       entry.image = {
         data: buffer,
