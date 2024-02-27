@@ -98,9 +98,6 @@ export async function action({ request }) {
   const text = formData.get("text"); // Get the text field
   const imageFile = formData.get("image"); // Get the image file
 
-  // Simulate a delay (if needed)
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   // Check for the presence and types of the text fields
   if (
     typeof date !== "string" ||

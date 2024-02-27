@@ -85,8 +85,6 @@ export async function action({ request, params }) {
   const text = formData.get("text"); // Get the text field
   const imageFile = formData.get("image"); // Get the image file
 
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   if (_action === "delete") {
     await mongoose.models.Entry.findByIdAndDelete(params.entryId);
 
