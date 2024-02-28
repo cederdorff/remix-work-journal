@@ -27,12 +27,17 @@ export default function EntryForm({ entry }) {
 
   function handleImageChange(event) {
     const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setImage(e.target.result);
-    };
-    reader.readAsDataURL(file);
+    if (file.size < 500000) {
+      // image file size must be below 0,5MB
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Image size must be less than 0.5MB.");
+      event.target.value = "";
+    }
   }
 
   return (
@@ -84,7 +89,6 @@ export default function EntryForm({ entry }) {
             className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
             name="image"
             type="file"
-            required
             onChange={handleImageChange}
           />
           {image && <img src={image} alt="" className="mt-2 rounded-lg" />}
