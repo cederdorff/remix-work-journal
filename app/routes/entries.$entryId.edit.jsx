@@ -2,6 +2,7 @@ import { redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import mongoose from "mongoose";
 import EntryForm from "~/components/entry-form";
+import { uploadImage } from "~/upload-handler.server";
 import { getSession } from "~/session";
 
 export async function loader({ params, request }) {
@@ -77,14 +78,7 @@ export async function action({ request, params }) {
   }
 
   const formData = await request.formData();
-
-  const _action = formData.get("_action");
-  const date = formData.get("date");
-  const type = formData.get("type"); // Get the type field
-  const text = formData.get("text"); // Get the text field
-  const imageFile = formData.get("image"); // Get the image file
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const { _action, date, type, text, image } = Object.fromEntries(formData);
 
   if (_action === "delete") {
     await mongoose.models.Entry.findByIdAndDelete(params.entryId);
@@ -95,27 +89,20 @@ export async function action({ request, params }) {
       typeof date !== "string" ||
       typeof type !== "string" ||
       typeof text !== "string" ||
-      !imageFile // Directly check for file presence, no need to check type
+      !image // Directly check for file presence, no need to check type
     ) {
       throw new Error("Bad request");
     }
 
-    const entry = await mongoose.models.Entry.findById(params.entryId);
+    const entry = await mongoose.models.Entry.findById(params.entryId); // Find the entry by ID
+    entry.date = new Date(date); // Update the date
+    entry.type = type; // Update the type
+    entry.text = text; // Update the text
 
-    entry.date = new Date(date);
-    entry.type = type;
-    entry.text = text;
-
-    if (imageFile instanceof File) {
-      // Ensure imageFile is handled as a File
-      const imageData = await imageFile.arrayBuffer(); // Convert the image file to ArrayBuffer
-      const buffer = Buffer.from(imageData); // Convert ArrayBuffer to Node.js Buffer
-      const contentType = imageFile.type; // Get the MIME type of the image
-
-      entry.image = {
-        data: buffer,
-        contentType,
-      };
+    // Assuming imageFile is a File object now, we can properly work with it
+    if (image instanceof File) {
+      const imageUrl = await uploadImage(image); // Upload the image to Firebase Storage
+      entry.image = imageUrl; // Save the image URL to the entry
     }
 
     await entry.save();

@@ -3,6 +3,7 @@ import { format, parseISO, startOfWeek } from "date-fns";
 import mongoose from "mongoose";
 import EntryForm from "~/components/entry-form";
 import EntryList from "~/components/entry-list";
+import { uploadImage } from "~/upload-handler.server";
 import { getSession } from "~/session";
 
 export async function loader({ request }) {
@@ -91,40 +92,28 @@ export async function action({ request }) {
   }
 
   const formData = await request.formData();
-  // Correctly extract fields and files
-  const date = formData.get("date");
-  const type = formData.get("type"); // Get the type field
-  const text = formData.get("text"); // Get the text field
-  const imageFile = formData.get("image"); // Get the image file
-
-  // Simulate a delay (if needed)
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const { date, type, text, image } = Object.fromEntries(formData);
 
   // Check for the presence and types of the text fields
   if (
     typeof date !== "string" ||
     typeof type !== "string" ||
     typeof text !== "string" ||
-    !imageFile // Directly check for file presence, no need to check type
+    !image // Directly check for file presence, no need to check type
   ) {
     throw new Error("Bad request");
   }
 
   // Assuming imageFile is a File object now, we can properly work with it
-  if (imageFile instanceof File) {
+  if (image instanceof File) {
     // Ensure imageFile is handled as a File
-    const imageData = await imageFile.arrayBuffer(); // Convert the image file to ArrayBuffer
-    const buffer = Buffer.from(imageData); // Convert ArrayBuffer to Node.js Buffer
-    const contentType = imageFile.type; // Get the MIME type of the image
+    const imageUrl = await uploadImage(image);
 
     const entry = new mongoose.models.Entry({
       date: new Date(date),
       type,
       text,
-      image: {
-        data: buffer,
-        contentType,
-      },
+      image: imageUrl,
     });
 
     await entry.save();

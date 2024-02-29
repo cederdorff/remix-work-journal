@@ -8,7 +8,7 @@ export default function EntryForm({ entry }) {
   const isIdle = fetcher.state === "idle";
   const isInit = isIdle && fetcher.data == null;
 
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(entry?.image ? entry?.image : null);
 
   useEffect(() => {
     if (!isInit && isIdle && textareaRef.current) {
@@ -16,14 +16,6 @@ export default function EntryForm({ entry }) {
       textareaRef.current.focus();
     }
   }, [isInit, isIdle]);
-
-  useEffect(() => {
-    if (entry?.image) {
-      setImage(
-        `data:${entry.image.contentType};base64,${entry.image.data.toString("base64")}`,
-      );
-    }
-  }, [entry?.image]);
 
   function handleImageChange(event) {
     const file = event.target.files[0];
